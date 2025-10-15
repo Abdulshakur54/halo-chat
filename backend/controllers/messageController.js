@@ -1,14 +1,15 @@
-import { Schema } from "mongoose"
+import mongoose from "mongoose"
 import { cloudinary } from "../lib/cloudinary.js"
 import Message from "../models/Message.js"
 import User from "../models/User.js"
 import y from 'yup'
-import { stext } from "../lib/validator.js"
-import {io, userSocketMap} from './../server.js'
+import { stext, sobjectId } from "../lib/validator.js"
+import { io, userSocketMap } from './../server.js'
+import { uploadFile } from "../lib/helper.js"
 
 export const getUsersForSidebar = async (req, res) => {
     try {
-        const userId = req.user._id
+        const userId = req.user._id;
         // get other users
         const otherUsers = await User.find({ _id: { $ne: userId } }).select("-password")
         const unseenMessages = {}
@@ -19,9 +20,10 @@ export const getUsersForSidebar = async (req, res) => {
             }
         })
         await Promise.all(promises)
-        res.status(200).json({ success: true, data: {users: otherUsers, unseenMessages} })
+        res.status(200).json({ success: true, data: { users: otherUsers, unseenMessages } })
 
     } catch (e) {
+        console.log(e)
         res.status(500).json({ success: false, message: e.message })
     }
 }
@@ -29,13 +31,13 @@ export const getUsersForSidebar = async (req, res) => {
 export const getMessages = async (req, res) => {
     try {
         const { id: selectedId } = req.params;
-        if (!selectedId instanceof Schema.Types.ObjectId)
-            return res.status(400).json({ success: false, message: "Invalid ID" })
+        const schema = y.object({ selectedId: sobjectId })
+        const valData = await schema.validate({ selectedId })
         // get all chat messages
         const messages = await Message.find({
             $or: [
-                { senderId: selectedId, receiverId: req.user._id },
-                { senderId: req.user._id, receiverId: selectedId },
+                { senderId: valData.selectedId, receiverId: req.user._id },
+                { senderId: req.user._id, receiverId: valData.selectedId },
             ]
         })
         res.status(200).json({ success: true, data: { messages } })
@@ -48,22 +50,24 @@ export const getMessages = async (req, res) => {
 export const updateMessagesAsSeen = async (req, res) => {
     try {
         const { id: selectedId } = req.params;
-        if (!selectedId instanceof Schema.Types.ObjectId)
-            return res.status(400).json({ success: false, message: "Invalid ID" })
-        await Message.updateMany({ senderId: selectedId, receiverId: req.user._id }, { seen: true });
-        res.status(204).json({ success: true })
+        const userId = req.user._id
+        const schema = y.object({ selectedId: sobjectId, userId: sobjectId })
+        const valData = await schema.validate({ selectedId, userId })
+        await Message.updateMany({ senderId: valData.selectedId, receiverId: valData.userId }, { seen: true });
+        res.status(200).json({ success: true })
     } catch (e) {
+        console.log(e)
         res.status(500).json({ success: false, message: e.message })
     }
 }
 
 export const updateMessageAsSeen = async (req, res) => {
     try {
-        const id = req.params.id
-        if (!id instanceof Schema.Types.ObjectId)
-            return res.status(400).json({ success: false, message: "Invalid ID" })
-        await Message.findByIdAndUpdate(id, { seen: true })
-        res.status(204).json({ success: true })
+        const { id: selectedId } = req.params;
+        const schema = y.object({ selectedId: sobjectId })
+        const valData = await schema.validate({ selectedId })
+        await Message.findByIdAndUpdate(valData.selectedId, { seen: true })
+        res.status(200).json({ success: true })
     }
     catch (e) {
         res.status(500).json({ success: false, message: e.message })
@@ -73,23 +77,27 @@ export const updateMessageAsSeen = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
     try {
-        const id = req.params.id
-        if (!id instanceof Schema.Types.ObjectId)
-            return res.status(400).json({ success: false, message: "Invalid ID" })
-        const { image, text } = req.body
-        const schema = y.object({
-            text: stext
-        })
-        const {text: txt} = await schema.validate({ text })
-        const uploadRes = await cloudinary.uploader.upload(image)
-        const { secure_url, public_id } = uploadRes
-        const newMessage = await Message.create({ senderId: req.user._id, receiverId: id, text: txt, image: secure_url, imageId: public_id })
-        if(id in userSocketMap){
-            io.to(userSocketMap[id]).emit('newMessage', newMessage)
+        const { id: selectedId } = req.params;
+        let newMessage;
+        if (req.file) {
+            const schema = y.object({ selectedId: sobjectId })
+            const valData = await schema.validate({ selectedId })
+            const { secure_url, public_id } = await uploadFile(req.file)
+            newMessage = await Message.create({ senderId: req.user._id, receiverId: valData.selectedId, image: secure_url, imageId: public_id })
+        } else {
+            const { text } = req.body
+            const schema = y.object({ selectedId: sobjectId, text: stext })
+            const valData = await schema.validate({ selectedId, text })
+            newMessage = await Message.create({ senderId: req.user._id, receiverId: valData.selectedId, text: valData.text})
         }
-        res.status(204).json({ success: true, data: {message: newMessage} })
+        if (selectedId in userSocketMap) {
+            io.to(userSocketMap[selectedId]).emit('newMessage', newMessage)
+        }
+        
+        res.status(200).json({ success: true, data: { message: newMessage } })
     }
     catch (e) {
+        console.log(e)
         res.status(500).json({ success: false, message: e.message })
     }
 }

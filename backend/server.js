@@ -8,6 +8,8 @@ import { messageRouter } from './routes/messageRouter.js'
 import { authenticate } from './middlewares/auth.js'
 import { Server } from 'socket.io'
 import { userRouter } from './routes/userRoute.js'
+import { publicRoute } from "./routes/publicRoute.js";
+import { passwordRecoveryRouter } from "./lib/passwordRecovery.js";
 
 
 const app = express()
@@ -45,6 +47,8 @@ app.get('/api/status', (req, res) => {
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/messages', authenticate, messageRouter)
 app.use('/api/v1/users', authenticate, userRouter)
+app.use("/api/v1/public", publicRoute);
+app.use("/api/v1/password-recovery", passwordRecoveryRouter);
 
 const port = process.env.PORT || 3000
 server.listen(port, () => { console.log(`Server is listening at port ${port}`) })

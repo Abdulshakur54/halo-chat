@@ -28,7 +28,7 @@ export const signUp = async (req, res) => {
 
 
     } catch (e) {
-      
+
         if (e instanceof ValidationError) {
             res.status(400).json({ success: false, message: e.errors })
         } else {
@@ -42,6 +42,7 @@ export const signUp = async (req, res) => {
 
 export const login = async (req, res) => {
     const { email, password } = req.body
+    console.log({ email, password })
     const schema = y.object({
         email: semail,
         password: spassword
@@ -51,12 +52,20 @@ export const login = async (req, res) => {
         {
             const { email, password } = valData
             const user = await User.findOne({ email })
-            if (await bcrypt.compare(password, user.password)) {
-                const token = generateToken(user._id)
-                res.status(200).json({ success: true, message: "Login successfully", token })
+            if (user) {
+                if (await bcrypt.compare(password, user.password)) {
+                    const token = generateToken(user._id)
+                    res.status(200).json({ success: true, message: "Login successfully", token, data: { user } })
+                } else {
+                    res.status(400).json({ success: false, message: "Email and password did not match" })
+                }
+            } else {
+                res.status(400).json({ success: false, message: "You are yet to register an account with us" })
             }
+
         }
     } catch (e) {
+        console.log(e)
         if (e instanceof ValidationError) {
             res.status(400).json({ success: false, message: e.errors })
         } else {
