@@ -1,14 +1,11 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-
+import toast from "react-hot-toast"
+import type { ToastOptions } from "react-hot-toast"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
-
-
-import toast from "react-hot-toast"
-import type { ToastOptions } from "react-hot-toast"
 
 /**
  * Format a date into a HH:mm (24-hour) time string

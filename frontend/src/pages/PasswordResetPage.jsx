@@ -28,7 +28,7 @@ const PasswordResetPage = () => {
         try {
             const res = await api.post("/api/v1/password-recovery/reset-password", { password, cpassword, token });
             if (res.status === 200 && res.data.success) {
-                toast.success(res.data.message)
+                toast.success(res.data.message, {duration: 7000})
                 navigate('/login')
             }
         } catch (err) {
