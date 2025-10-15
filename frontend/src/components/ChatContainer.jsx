@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFileImport, faPaperPlane, faCircleLeft } from '@fortawesome/free-solid-svg-icons'
 import { formatMessageTime } from '../lib/utils'
 import { ChatContext } from '../contexts/ChatContext'
-import { AuthContext } from '../contexts/authContext'
+import { AuthContext } from '../contexts/AuthContext'
 import { toast } from '../lib/utils'
 import Image from './CloudinaryImage'
 

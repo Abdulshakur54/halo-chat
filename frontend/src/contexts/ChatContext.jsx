@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { AuthContext } from "./authContext";
+import { AuthContext } from "./AuthContext";
 import { toast } from '../lib/utils.js'
 export const ChatContext = createContext()
 export const ChatProvider = ({ children }) => {
