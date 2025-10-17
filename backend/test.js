@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 
-const resend = new Resend('re_AuvM7Axn_NoKUQDpFh9T2khEXfa3KKJ67');
+
 
 resend.emails.send({
   from: 'send.halo-chat-m7qu',
