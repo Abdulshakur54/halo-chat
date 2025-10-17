@@ -34,7 +34,7 @@ const ContactUsPage = () => {
         const res = await api.post("/api/v1/public/contactus", { fullName, email, message, captchaData: recaptchaRsp });
         if (res.status === 200) {
           toast.success(res.data.message)
-          toast.success('Do you check your spam folder for our automated response if not found in your Inbox')
+          toast.success('Do you check your spam folder for our automated response if not found in your Inbox', {duration: 10})
           navigate('/')
         }
       } catch (err) {
