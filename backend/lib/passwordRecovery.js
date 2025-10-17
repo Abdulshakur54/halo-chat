@@ -10,7 +10,6 @@ import bcrypt from "bcryptjs";
 const users = process.env.PASSWORD_RECOVERY_USER_COLLECTION
 const companyName = process.env.PASSWORD_RECOVERY_COMPANY_NAME
 const expiryMinutes = parseInt(process.env.PASSWORD_RECOVERY_EXPIRY_TIME || "15", 10); // default to 15 if not set
-const expiresOn = new Date(Date.now() + expiryMinutes * 60 * 1000).toISOString();
 const frontendURL = process.env.PASSWORD_RECOVERY_FRONTEND_URL
 
 const passwordRecoverySchema = new Schema({
@@ -35,6 +34,7 @@ const requestReset = async (req, res) => {
             const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
             // delete any existing resetRecord for this email
             await PasswordRecovery.deleteMany({ email: data.email })
+            const expiresOn = new Date(Date.now() + expiryMinutes * 60 * 1000).toISOString();
             await PasswordRecovery.create({ email: data.email, hashedToken, expiresOn }) // save hashed token to the collection
             const name = result?.firstName || result?.fullName || result?.name
             const resetLink = `${frontendURL}/reset-password/${token}`;
