@@ -173,7 +173,8 @@ const LoginPage = () => {
 
         </div>
       </form>
-      <div className="absolute bottom-[50px] left-1/2 -translate-x-1/2">
+      
+      <div className="absolute bottom-[70px]">
         <p className='text-sm text-gray-300 flex items-center justify-center'>
           <span>You have a message for us?&nbsp;&nbsp;<span className='font-medium text-violet-500 cursor-pointer' onClick={() => navigate('/contact')}>Contact us here</span></span>
         </p>
