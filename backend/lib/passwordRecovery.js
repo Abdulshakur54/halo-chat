@@ -77,7 +77,7 @@ const resetPassword = async (req, res) => {
         if (!tokenValid) {
             return res.status(400).json({ success: false, message: "Invalid Token" })
         } else {
-            if (Date.now() > new Date(tokenValid.expiresOn).getTime()) return res.status(400).json({ success: false, message: "Expired Token" })
+            if (Date.now() > new Date(tokenValid.expiresOn).getTime()) return res.status(400).json({ success: false, message: `Expired Token | now: ${Date.now()}, tokenExpiry: ${new Date(tokenValid.expiresOn).getTime()} ` })
         }
         const email = tokenValid.email
 
