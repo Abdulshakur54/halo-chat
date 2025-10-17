@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 import { object, ValidationError } from "yup"
 import val from "./functions.js"
-import { generateResetPasswordHtml, generateResetPasswordSuccessHtml, sendEmail } from "./nodemail.js"
+import { generateResetPasswordHtml, generateResetPasswordSuccessHtml, sendEmail } from "./brevo.js"
 import crypto from "crypto";
 import { Router } from "express";
 import bcrypt from "bcryptjs";

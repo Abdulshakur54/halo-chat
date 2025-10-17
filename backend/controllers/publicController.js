@@ -1,5 +1,5 @@
 import val from '../lib/functions.js'
-import { generateContactMessageHtml, sendEmail } from '../lib/nodemail.js'
+import { generateContactMessageHtml, sendEmail } from '../lib/brevo.js'
 import axios from 'axios'
 import y, { ValidationError } from 'yup'
 
