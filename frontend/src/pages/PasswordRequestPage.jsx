@@ -26,6 +26,7 @@ const PasswordRequestPage = () => {
       const res = await api.post("/api/v1/password-recovery/request-reset", { email });
       if (res.status === 200 && res.data.success) {
         toast.success(res.data.message)
+        toast.success("Check your spam folder for the email if you don't get it immediately", {duration: Infinity})
         navigate('/login')
       }
     } catch (err) {
